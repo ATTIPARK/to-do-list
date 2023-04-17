@@ -46,11 +46,27 @@ router.post("/", async (req, res) => {
 router.get("/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
+    const { skip } = req.query;
+
+    const user = await client.user.findUnique({
+      where: {
+        id: parseInt(userId),
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ ok: false, error: "Not exist user." });
+    }
 
     const todos = await client.todo.findMany({
       where: {
         userId: parseInt(userId),
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: parseInt(skip),
+      take: 3,
     });
 
     res.json({ ok: true, todos });
